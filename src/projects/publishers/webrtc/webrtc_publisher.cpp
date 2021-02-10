@@ -128,26 +128,41 @@ bool WebRtcPublisher::Start()
 
 			rtsp_live_app_metrics = nullptr;
 			rtsp_play_app_metrics = nullptr;
-			
-			// This log only for the "default" host and the "rtsp_live"/"rtsp_playback" applications 
-			rtsp_live_app_info = std::static_pointer_cast<info::Application>(GetApplicationByName(ocst::Orchestrator::GetInstance()->ResolveApplicationName("default", "rtsp_live")));
-			if (rtsp_live_app_info != nullptr)
-			{
-				rtsp_live_app_metrics = ApplicationMetrics(*rtsp_live_app_info);
-			}
-			rtsp_play_app_info = std::static_pointer_cast<info::Application>(GetApplicationByName(ocst::Orchestrator::GetInstance()->ResolveApplicationName("default", "rtsp_playback")));
-			if (rtsp_play_app_info != nullptr)
-			{
-				rtsp_play_app_metrics = ApplicationMetrics(*rtsp_play_app_info);
+
+			int total_conn_count = 0;
+			std::vector<std::shared_ptr<pub::Application>> apps = GetApplications();
+			for(auto& app : apps){
+				auto infoapp = std::static_pointer_cast<info::Application>(apps);
+				total_conn_count += ApplicationMetrics(*infoapp)->GetTotalConnections();
 			}
 
-			stat_log(STAT_LOG_WEBRTC_EDGE_VIEWERS, "%s,%s,%s,%s,,,%u,%u",
+
+			// This log only for the "default" host and the "rtsp_live"/"rtsp_playback" applications 
+			// rtsp_live_app_info = std::static_pointer_cast<info::Application>(GetApplicationByName(ocst::Orchestrator::GetInstance()->ResolveApplicationName("default", "rtsp_live")));
+			// if (rtsp_live_app_info != nullptr)
+			// {
+			// 	rtsp_live_app_metrics = ApplicationMetrics(*rtsp_live_app_info);
+			// }
+			// rtsp_play_app_info = std::static_pointer_cast<info::Application>(GetApplicationByName(ocst::Orchestrator::GetInstance()->ResolveApplicationName("default", "rtsp_playback")));
+			// if (rtsp_play_app_info != nullptr)
+			// {
+			// 	rtsp_play_app_metrics = ApplicationMetrics(*rtsp_play_app_info);
+			// }
+
+			stat_log(STAT_LOG_WEBRTC_EDGE_VIEWERS, "%s,%s,%s,%s,,,%u",
 					ov::Clock::Now().CStr(),
 					"WEBRTC.SS",
-					"CONN_COUNT",
+					"TOTAL_CONN_COUNT",
 					"INFO",
-					rtsp_live_app_metrics != nullptr ? rtsp_live_app_metrics->GetTotalConnections() : 0,
-					rtsp_play_app_metrics != nullptr ? rtsp_play_app_metrics->GetTotalConnections() : 0);
+					total_conn_count);
+
+			// stat_log(STAT_LOG_WEBRTC_EDGE_VIEWERS, "%s,%s,%s,%s,,,%u,%u",
+			// 		ov::Clock::Now().CStr(),
+			// 		"WEBRTC.SS",
+			// 		"CONN_COUNT",
+			// 		"INFO",
+			// 		rtsp_live_app_metrics != nullptr ? rtsp_live_app_metrics->GetTotalConnections() : 0,
+			// 		rtsp_play_app_metrics != nullptr ? rtsp_play_app_metrics->GetTotalConnections() : 0);
 
 			return ov::DelayQueueAction::Repeat;
 		}

@@ -98,6 +98,7 @@ namespace pub
 		virtual bool Start();
 		virtual bool Stop();
 
+		std::vector<std::shared_ptr<Application>> GetApplications();
 		std::shared_ptr<Application> GetApplicationByName(const info::VHostAppName &vhost_app_name);
 
 		// First GetStream(vhost_app_name, stream_name) and if it fails pull stream by the orchetrator

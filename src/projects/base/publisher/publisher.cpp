@@ -146,6 +146,16 @@ namespace pub
 		return _applications.size();
 	}
 
+	std::vector<std::shared_ptr<Application>> Publisher::GetApplications(){
+		std::shared_lock<std::shared_mutex> lock(_application_map_mutex);
+		std::vector<std::shared_ptr<Application>> apps;
+		for (auto const &x : _applications)
+		{
+			apps.push_back(x.second);
+		}
+		return apps;
+	}
+
 	std::shared_ptr<Application> Publisher::GetApplicationByName(const info::VHostAppName &vhost_app_name)
 	{
 		std::shared_lock<std::shared_mutex> lock(_application_map_mutex);
